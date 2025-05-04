@@ -1,0 +1,63 @@
+                    [Raspberry Pi 4]
+                        +--------------------------+
+                        |                          |
+                        |   USB-C Power Input      |
+                        |                          |
+                        |   GPIO17 ─────────┐      |
+                        |   (Fan control)   │      |
+                        |                  ┌▼┐     |
+                        |   GPIO27 ─────┐  │ │     |
+                        | (SSR control) │  │ │     |
+                        |               ▼  ▼ ▼     |
+                        +---------------┬--┬--+    |
+                                        |  |       |
+                                    [SunFounder 2-Channel Relay]
+                                        |  |
+              +-------------------------┘  └---------------------------+
+              |                                                           |
+     Channel 1 (IN1)                                              Channel 2 (IN2)
+     │                                                            │
+     ▼                                                            ▼
+[Controls SSR DC +]                                     [Controls 120V AC Fan Line]
+     │                                                            │
+     │                                                            ▼
+     │                                                [120V AC Cooling Fan]
+     ▼
+[Solid State Relay]
+(DC side: 3–32V) ←───────────────+
+(AC side: 24–480V)               |
+                                 ▼
+                            [240V Kiln Elements]
+                          (AIM 1413, 14 amps @ 240V)
+
+----------------------------------------
+[POWER SETUP – AC SIDE]
+
+240V Wall Power (Hot1 + Hot2) ───►
+    ├── Inline Fuse ───► SSR Input Terminal 1
+    └──────────────────► Kiln Neutral (or Hot2 depending on split-phase wiring)
+SSR Output Terminal 2 ───► Kiln Element Power Input
+
+Fan Neutral ─────────────► AC Neutral Bus Bar
+Grounds ────────────────► Proper Earth Ground
+
+----------------------------------------
+[SENSOR SETUP – MAX31855 K-Type Thermocouple Reader]
+
+Thermocouple ──────► MAX31855
+MAX31855 to Pi SPI Pins:
+    VCC  ──────────► Pi 3.3V (or 5V if board allows)
+    GND  ──────────► Pi GND
+    DO   ──────────► Pi GPIO9 (MISO)
+    CS   ──────────► Pi GPIO8 (CE0)
+    CLK  ──────────► Pi GPIO11 (SCLK)
+
+----------------------------------------
+
+NOTES:
+• Raspberry Pi powers the relay board through its 5V GPIO and GND pins.
+• Each relay only requires 15–20mA, well within Pi’s limits.
+• The SSR switches 240V to kiln ONLY via relay isolation.
+• The fan can optionally be turned on/off based on Pi’s CPU temp.
+• Inline fuse (or breaker) protects from overload.
+• NEVER connect Pi GPIO directly to SSR or high voltage!
